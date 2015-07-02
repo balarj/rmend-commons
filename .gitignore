@@ -1,0 +1,6 @@
+.idea/
+.DS_Store
+.gitconfig
+target/
+*.iml
+web/
