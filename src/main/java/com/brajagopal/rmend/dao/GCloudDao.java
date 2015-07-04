@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * @author <bxr4261>
  */
@@ -33,7 +34,9 @@ public class GCloudDao implements IRMendDao {
 
     private static final Logger logger = Logger.getLogger(GCloudDao.class);
     private final Datastore datastore;
-    private int batchSize;
+
+    private int writeBatchSize;
+    private int readBatchSize;
 
     static final String DOCUMENT_KIND = "document";
     static final String DOCUMENT_MD5SUM_KIND = "md5sum";
@@ -49,27 +52,21 @@ public class GCloudDao implements IRMendDao {
     static final String DOCUMENT_META_KIND = "docMeta";
 
     static final int DEFAULT_RESULT_LIMIT = 20;
+    static final int DEFAULT_READ_BATCH_SIZE = 10;
+    static final int DEFAULT_WRITE_BATCH_SIZE = 1;
 
-    private GCloudDao(boolean _isLocal) throws GeneralSecurityException, IOException {
-        this(_isLocal, 1);
+    public GCloudDao() throws GeneralSecurityException, IOException {
+        this(DEFAULT_WRITE_BATCH_SIZE, DEFAULT_READ_BATCH_SIZE);
     }
 
-    private GCloudDao(boolean _isLocal, int _batchSize) throws GeneralSecurityException, IOException {
-        batchSize = _batchSize;
-        if (_isLocal) {
-            datastore = DatastoreHelper.getDatastoreFromEnv();
-        }
-        else {
-            datastore = null;
-        }
+    private GCloudDao(int _writeBatchSize, int _readBatchSize) throws GeneralSecurityException, IOException {
+        datastore = DatastoreHelper.getDatastoreFromEnv();
+        this.readBatchSize = _readBatchSize;
+        this.writeBatchSize = _writeBatchSize;
     }
 
     public static GCloudDao getLocalInstance() throws GeneralSecurityException, IOException {
-        return new GCloudDao(true);
-    }
-
-    public static GCloudDao getLocalInstance(int _batchSize) throws GeneralSecurityException, IOException {
-        return new GCloudDao(true, _batchSize);
+        return new GCloudDao();
     }
 
     @Override
@@ -152,7 +149,7 @@ public class GCloudDao implements IRMendDao {
 
             builder.addInsert(article);
 
-            if ((ctr++ % batchSize) == 0) {
+            if ((ctr++ % writeBatchSize) == 0) {
                 try {
                     persist(builder);
                 }
