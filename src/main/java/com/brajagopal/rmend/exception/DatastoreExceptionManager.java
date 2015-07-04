@@ -27,6 +27,7 @@ public class DatastoreExceptionManager {
             exceptionLog.get(dsErrorBean.toString()).incrementAndGet();
 
         } catch (JSONException e) {
+            _datastoreException.printStackTrace();
             e.printStackTrace();
         }
     }
