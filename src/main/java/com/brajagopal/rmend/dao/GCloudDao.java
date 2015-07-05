@@ -19,10 +19,7 @@ import org.apache.log4j.Logger;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -109,6 +106,7 @@ public class GCloudDao implements IRMendDao {
         }
         catch (DatastoreException e) {
             DatastoreExceptionManager.trackException(e, "putDocument()");
+            throw e;
         }
     }
 
@@ -234,13 +232,23 @@ public class GCloudDao implements IRMendDao {
 
         int timeout_ms = 100;
         int timeout_cnt = 10;
-        while(true) {
+        while(true && timeout_cnt != 0) {
             try {
                 datastore.commit(request);
                 break;
             } catch (DatastoreException e) {
-                Thread.sleep(timeout_ms);
-                timeout_ms *= 2;
+                if (Arrays.asList(403, 409, 503).contains(e.getCode())) {
+                    Thread.sleep(timeout_ms);
+                    timeout_ms *= 2;
+                    timeout_cnt--;
+                }
+                else if (e.getCode() == 500) {
+                    timeout_cnt-=6; // We dont want to keep retrying this more than once
+                    Thread.sleep(30000l);
+                }
+                else {
+                    throw e;
+                }
             }
         }
     }
