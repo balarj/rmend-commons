@@ -16,8 +16,8 @@ import java.util.Map;
 public interface IRMendDao {
 
     // Document specific DAO methods
-    public void putDocument(DocumentBean _docBean) throws DatastoreException;
-    public void putDocument(DocumentBean _docBean, String _identifier) throws DatastoreException;
+    public void putDocument(DocumentBean _docBean) throws DatastoreException, InterruptedException;
+    public void putDocument(DocumentBean _docBean, String _identifier) throws DatastoreException, InterruptedException;
 
     public DocumentBean getDocument(Long _documentNumber) throws DatastoreException;
     public DocumentBean getDocument(Long _documentNumber, Integer _limit) throws DatastoreException;

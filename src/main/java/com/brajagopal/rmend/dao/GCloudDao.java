@@ -76,13 +76,14 @@ public class GCloudDao implements IRMendDao {
     }
 
     @Override
-    public void putDocument(DocumentBean _docBean) throws DatastoreException {
+    public void putDocument(DocumentBean _docBean) throws DatastoreException, InterruptedException {
         putDocument(_docBean, _docBean.getContentMD5Sum());
     }
 
     @Override
-    public void putDocument(DocumentBean _docBean, String _identifier) throws DatastoreException {
+    public void putDocument(DocumentBean _docBean, String _identifier) throws DatastoreException, InterruptedException {
         Collection<Value> topicValues = new ArrayList<Value>();
+        Mutation.Builder builder = Mutation.newBuilder();
         for (String topic : _docBean.getTopic()) {
             topicValues.add(DatastoreHelper.makeValue(topic).build());
         }
@@ -101,7 +102,14 @@ public class GCloudDao implements IRMendDao {
                 .setMutation(Mutation.newBuilder().addInsert(article))
                 .build();
 
-        datastore.commit(request);
+        builder.addInsert(article);
+
+        try {
+            persist(builder);
+        }
+        catch (DatastoreException e) {
+            DatastoreExceptionManager.trackException(e, "putDocument()");
+        }
     }
 
     @Override
@@ -166,7 +174,6 @@ public class GCloudDao implements IRMendDao {
                     builder = Mutation.newBuilder();
                 }
             }
-            Thread.sleep(DEFAULT_SLEEP);
         }
     }
 
@@ -219,13 +226,23 @@ public class GCloudDao implements IRMendDao {
         return retVal;
     }
 
-    private void persist(Mutation.Builder _builder) throws DatastoreException {
+    private void persist(Mutation.Builder _builder) throws DatastoreException, InterruptedException {
         CommitRequest request = CommitRequest.newBuilder()
                 .setMode(CommitRequest.Mode.NON_TRANSACTIONAL)
                 .setMutation(_builder)
                 .build();
 
-        datastore.commit(request);
+        int timeout_ms = 100;
+        int timeout_cnt = 10;
+        while(true) {
+            try {
+                datastore.commit(request);
+                break;
+            } catch (DatastoreException e) {
+                Thread.sleep(timeout_ms);
+                timeout_ms *= 2;
+            }
+        }
     }
 
     private List<Entity> runQuery(Query query) throws DatastoreException {
