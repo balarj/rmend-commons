@@ -6,10 +6,9 @@ import com.brajagopal.rmend.data.beans.DocumentBean;
 import com.brajagopal.rmend.data.meta.DocumentMeta;
 import com.brajagopal.rmend.exception.DatastoreExceptionManager;
 import com.brajagopal.rmend.utils.JsonUtils;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.datastore.DatastoreV1.*;
-import com.google.api.services.datastore.client.Datastore;
-import com.google.api.services.datastore.client.DatastoreException;
-import com.google.api.services.datastore.client.DatastoreHelper;
+import com.google.api.services.datastore.client.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
@@ -57,6 +56,12 @@ public class GCloudDao implements IRMendDao {
 
     public GCloudDao() throws GeneralSecurityException, IOException {
         this(DEFAULT_WRITE_BATCH_SIZE, DEFAULT_READ_BATCH_SIZE);
+    }
+
+    public GCloudDao(GoogleCredential credential) throws GeneralSecurityException, IOException {
+        datastore = DatastoreFactory.get().create(DatastoreHelper.getOptionsFromEnv().credential(credential).build());
+        this.readBatchSize = DEFAULT_READ_BATCH_SIZE;
+        this.writeBatchSize = DEFAULT_WRITE_BATCH_SIZE;
     }
 
     private GCloudDao(int _writeBatchSize, int _readBatchSize) throws GeneralSecurityException, IOException {
