@@ -23,7 +23,7 @@ public interface IRMendDao {
     public DocumentBean getDocument(Long _documentNumber, Integer _limit) throws DatastoreException;
 
     // Entity specific DAO methods
-    public void putEntityMeta(Collection<Map.Entry<String, DocumentMeta>> _docMetaCollection) throws DatastoreException;
+    public void putEntityMeta(Collection<Map.Entry<String, DocumentMeta>> _docMetaCollection) throws DatastoreException, InterruptedException;
 
     public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier) throws DatastoreException;
     public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers) throws DatastoreException;

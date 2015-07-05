@@ -53,6 +53,7 @@ public class GCloudDao implements IRMendDao {
     static final int DEFAULT_RESULT_LIMIT = 20;
     static final int DEFAULT_READ_BATCH_SIZE = 10;
     static final int DEFAULT_WRITE_BATCH_SIZE = 1;
+    static final long DEFAULT_SLEEP = 500l;
 
     public GCloudDao() throws GeneralSecurityException, IOException {
         this(DEFAULT_WRITE_BATCH_SIZE, DEFAULT_READ_BATCH_SIZE);
@@ -138,7 +139,7 @@ public class GCloudDao implements IRMendDao {
     }
 
     @Override
-    public void putEntityMeta(Collection<Map.Entry<String , DocumentMeta>> _docMetaCollection) throws DatastoreException {
+    public void putEntityMeta(Collection<Map.Entry<String , DocumentMeta>> _docMetaCollection) throws DatastoreException, InterruptedException {
         int ctr = 0;
         Mutation.Builder builder = Mutation.newBuilder();
         for (Map.Entry<String, DocumentMeta> entry : _docMetaCollection) {
@@ -165,6 +166,7 @@ public class GCloudDao implements IRMendDao {
                     builder = Mutation.newBuilder();
                 }
             }
+            Thread.sleep(DEFAULT_SLEEP);
         }
     }
 
