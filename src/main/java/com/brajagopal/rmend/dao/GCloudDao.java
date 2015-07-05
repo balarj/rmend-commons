@@ -146,7 +146,10 @@ public class GCloudDao implements IRMendDao {
 
     @Override
     public void putEntityMeta(Collection<Map.Entry<String , DocumentMeta>> _docMetaCollection) throws DatastoreException, InterruptedException {
-        int ctr = 0;
+        int runningCtr = 0;
+        int totalCount = _docMetaCollection.size();
+        String lastEntityIdentifier = "";
+        int entityCount = 0;
         Mutation.Builder builder = Mutation.newBuilder();
         for (Map.Entry<String, DocumentMeta> entry : _docMetaCollection) {
             String _entityIdentifier = entry.getKey();
@@ -161,9 +164,21 @@ public class GCloudDao implements IRMendDao {
 
             builder.addInsert(article);
 
-            if ((ctr++ % writeBatchSize) == 0) {
+            if (!lastEntityIdentifier.equals(_entityIdentifier)) {
+                if (entityCount != 0) {
+                    logger.info("Finished processing (" + entityCount + " records) for entity: {" + lastEntityIdentifier + "}");
+                    logger.info("*** Overall progress: "+Math.round(runningCtr/totalCount) + "% ***");
+                    logger.info("Starting to process entity: {" + _entityIdentifier + "}");
+                }
+                // reset the identifier and counter
+                lastEntityIdentifier = _entityIdentifier;
+                entityCount = 0;
+            }
+
+            if ((runningCtr++ % writeBatchSize) == 0) {
                 try {
                     persist(builder);
+                    entityCount++;
                 }
                 catch (DatastoreException e) {
                     DatastoreExceptionManager.trackException(e, "putEntityMeta(Collection)");
