@@ -167,7 +167,7 @@ public class GCloudDao implements IRMendDao {
             if (!lastEntityIdentifier.equals(_entityIdentifier)) {
                 if (entityCount != 0) {
                     logger.info("Finished processing (" + entityCount + " records) for entity: {" + lastEntityIdentifier + "}");
-                    logger.info("*** Overall progress: "+Math.round(runningCtr/totalCount) + "% ***");
+                    logger.info("*** Overall progress: "+Math.round((runningCtr/totalCount)*100) + "% ***");
                     logger.info("Starting to process entity: {" + _entityIdentifier + "}");
                 }
                 // reset the identifier and counter
