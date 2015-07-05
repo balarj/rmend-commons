@@ -89,7 +89,7 @@ public class ContentDictionary {
         return dict.size();
     }
 
-    public void persistData(IRMendDao _dao) throws DatastoreException {
+    public void persistData(IRMendDao _dao) throws DatastoreException, InterruptedException {
         if (CollectionUtils.isEmpty(dict.entries())) {
             logger.warn("The ContentDictionary is empty.");
         }
