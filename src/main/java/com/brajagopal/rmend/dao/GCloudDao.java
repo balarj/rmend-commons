@@ -1,19 +1,23 @@
 package com.brajagopal.rmend.dao;
 
+import com.brajagopal.rmend.exception.DocumentNotFoundException;
 import com.brajagopal.rmend.data.ContentDictionary;
 import com.brajagopal.rmend.data.beans.BaseContent;
 import com.brajagopal.rmend.data.beans.DocumentBean;
 import com.brajagopal.rmend.data.meta.DocumentMeta;
-import com.brajagopal.rmend.exception.DatastoreExceptionManager;
 import com.brajagopal.rmend.utils.JsonUtils;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.datastore.DatastoreV1.*;
-import com.google.api.services.datastore.client.*;
+import com.google.api.services.datastore.client.Datastore;
+import com.google.api.services.datastore.client.DatastoreException;
+import com.google.api.services.datastore.client.DatastoreFactory;
+import com.google.api.services.datastore.client.DatastoreHelper;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ComparatorUtils;
+import org.apache.commons.math3.util.Precision;
 import org.apache.log4j.Logger;
 
 import javax.annotation.Nullable;
@@ -105,18 +109,17 @@ public class GCloudDao implements IRMendDao {
             persist(builder);
         }
         catch (DatastoreException e) {
-            DatastoreExceptionManager.trackException(e, "putDocument()");
             throw e;
         }
     }
 
     @Override
-    public DocumentBean getDocument(Long _documentNumber) throws DatastoreException {
+    public DocumentBean getDocument(Long _documentNumber) throws DatastoreException, DocumentNotFoundException {
         return getDocument(_documentNumber, DEFAULT_RESULT_LIMIT);
     }
 
     @Override
-    public DocumentBean getDocument(Long _documentNumber, Integer _limit) throws DatastoreException {
+    public DocumentBean getDocument(Long _documentNumber, Integer _limit) throws DatastoreException, DocumentNotFoundException {
         Query.Builder query = Query.newBuilder();
         query.addKindBuilder().setName(BaseContent.ContentType.DOCUMENT_INFO.toString());
         query.setFilter(DatastoreHelper.makeFilter(
@@ -126,7 +129,7 @@ public class GCloudDao implements IRMendDao {
         query.setLimit(_limit);
         List<Entity> documents = runQuery(query.build());
         if (documents.size() == 0) {
-            logger.warn("No Document found for DocumentNumber: " + _documentNumber);
+            throw new DocumentNotFoundException(_documentNumber);
         }
         else if (documents.size() == 1) {
             Map<String, Value> propertyMap = DatastoreHelper.getPropertyMap(documents.get(0));
@@ -167,7 +170,7 @@ public class GCloudDao implements IRMendDao {
             if (!lastEntityIdentifier.equals(_entityIdentifier)) {
                 if (entityCount != 0) {
                     logger.info("Finished processing (" + entityCount + " records) for entity: {" + lastEntityIdentifier + "}");
-                    logger.info("*** Overall progress: "+Math.round((runningCtr/totalCount)*100) + "% ***");
+                    logger.info("*** Overall progress: "+ Precision.round((((float)(runningCtr / totalCount)) * 100), 2) + "% ***");
                     logger.info("----------------------------------------------------------------------");
                     logger.info("Starting to process entity: {" + _entityIdentifier + "}");
                 }
@@ -182,7 +185,7 @@ public class GCloudDao implements IRMendDao {
                     entityCount++;
                 }
                 catch (DatastoreException e) {
-                    DatastoreExceptionManager.trackException(e, "putEntityMeta(Collection)");
+                    throw e;
                 }
                 finally {
                     builder = Mutation.newBuilder();
