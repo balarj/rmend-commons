@@ -1,5 +1,6 @@
 package com.brajagopal.rmend.dao;
 
+import com.brajagopal.rmend.data.ResultsType;
 import com.brajagopal.rmend.exception.DocumentNotFoundException;
 import com.brajagopal.rmend.data.ContentDictionary;
 import com.brajagopal.rmend.data.beans.BaseContent;
@@ -197,11 +198,11 @@ public class GCloudDao implements IRMendDao {
 
     @Override
     public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier) throws DatastoreException {
-        return getEntityMeta(_metaIdentifier, DEFAULT_RESULT_LIMIT);
+        return getEntityMeta(_metaIdentifier, ResultsType.DEFAULT_RESULT_TYPE);
     }
 
     @Override
-    public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier, Integer _limit) throws DatastoreException {
+    public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier, ResultsType _resultsType) throws DatastoreException {
         Collection<DocumentMeta> retVal = null;
         Query.Builder query = Query.newBuilder();
         query.addKindBuilder().setName(ContentDictionary.getContentType(_metaIdentifier).toString());
@@ -210,8 +211,10 @@ public class GCloudDao implements IRMendDao {
                 PropertyFilter.Operator.EQUAL,
                 DatastoreHelper.makeValue(_metaIdentifier)
         ));
-        query.addOrder(DatastoreHelper.makeOrder("score", PropertyOrder.Direction.DESCENDING));
-        query.setLimit(_limit);
+        if (_resultsType != ResultsType.RANDOM_10) {
+            query.addOrder(DatastoreHelper.makeOrder("score", PropertyOrder.Direction.DESCENDING));
+        }
+        query.setLimit(_resultsType.getDaoResultLimit());
         List<Entity> entityMetadata = runQuery(query.build());
         if (entityMetadata.size() == 0) {
             logger.warn("No Metadata found for EntityId: " + _metaIdentifier);
@@ -228,17 +231,17 @@ public class GCloudDao implements IRMendDao {
 
     @Override
     public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers) throws DatastoreException {
-        return getEntityMeta(_metaIdentifiers, DEFAULT_RESULT_LIMIT);
+        return getEntityMeta(_metaIdentifiers, ResultsType.DEFAULT_RESULT_TYPE);
     }
 
     @Override
-    public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers, Integer _limit) throws DatastoreException {
+    public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers, ResultsType _resultsType) throws DatastoreException {
         TreeMultimap<BaseContent.ContentType, DocumentMeta> retVal = TreeMultimap.create(ComparatorUtils.NATURAL_COMPARATOR, DocumentMeta.DOCUMENT_META_COMPARATOR);
         for (String metaIdentifier : _metaIdentifiers) {
-            Collection<DocumentMeta> entityMeta = getEntityMeta(metaIdentifier);
+            Collection<DocumentMeta> entityMeta = getEntityMeta(metaIdentifier, _resultsType);
             if (!CollectionUtils.isEmpty(entityMeta)) {
                 BaseContent.ContentType key = ContentDictionary.getContentType(metaIdentifier);
-                retVal.putAll(key, getEntityMeta(metaIdentifier));
+                retVal.putAll(key, getEntityMeta(metaIdentifier, _resultsType));
             }
         }
         return retVal;
