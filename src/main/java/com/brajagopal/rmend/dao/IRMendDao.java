@@ -1,5 +1,6 @@
 package com.brajagopal.rmend.dao;
 
+import com.brajagopal.rmend.data.ResultsType;
 import com.brajagopal.rmend.exception.DocumentNotFoundException;
 import com.brajagopal.rmend.data.beans.BaseContent;
 import com.brajagopal.rmend.data.beans.DocumentBean;
@@ -29,6 +30,6 @@ public interface IRMendDao {
     public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier) throws DatastoreException;
     public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers) throws DatastoreException;
 
-    public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier, Integer _limit) throws DatastoreException;
-    public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers, Integer _limit) throws DatastoreException;
+    public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier, ResultsType _resultsType) throws DatastoreException;
+    public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers, ResultsType _resultsType) throws DatastoreException;
 }
