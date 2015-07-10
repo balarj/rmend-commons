@@ -17,11 +17,20 @@ public class UserBean {
     private Long uid;
     private String userName;
     private String uuid;
+    private String createDate;
 
     private UserBean(Long _uid, String _userName, String _uuid) {
         this.uid = _uid;
         this.userName = _userName;
         this.uuid = _uuid;
+        this.createDate = DateTime.now().toString("YYYY-MM-dd HH:mm:ss");
+    }
+
+    private UserBean(Long _uid, String _userName, String _uuid, String _createDate) {
+        this.uid = _uid;
+        this.userName = _userName;
+        this.uuid = _uuid;
+        this.createDate = _createDate;
     }
 
     public Long getUid() {
@@ -36,8 +45,16 @@ public class UserBean {
         return uuid;
     }
 
+    public String getCreateDate() {
+        return createDate;
+    }
+
     public static UserBean create(String userName) {
         return new UserBean((BASE_MODIFIER +  RandomUtils.nextLong(1, 200)), userName, UUIDGenerator.generateUUID());
+    }
+
+    public static UserBean load(Long _uid, String _userName, String _uuid, String _createDate) {
+        return new UserBean(_uid, _userName, _uuid, _createDate);
     }
 
     @Override
@@ -45,6 +62,8 @@ public class UserBean {
         return "UserBean{" +
                 "uid=" + uid +
                 ", userName='" + userName + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", createDate=" + createDate +
                 '}';
     }
 
@@ -65,6 +84,7 @@ public class UserBean {
             root.addProperty("uid", userBean.getUid());
             root.addProperty("userName", userBean.userName);
             root.addProperty("uuid", userBean.uuid);
+            root.addProperty("createDate", userBean.createDate);
             return root;
         }
 
@@ -74,8 +94,9 @@ public class UserBean {
             final Long uid = root.get("uid").getAsLong();
             final String userName = root.get("userName").getAsString();
             final String uuid = root.get("uuid").getAsString();
+            final String createDate = root.get("createDate").getAsString();
 
-            return new UserBean(uid, userName, uuid);
+            return new UserBean(uid, userName, uuid, createDate);
         }
     }
 }
