@@ -4,25 +4,27 @@ package com.brajagopal.rmend.exception;
  * @author <bxr4261>
  */
 public class UserNotFoundException extends Throwable {
-    private final String uuid;
+
+    private final String message;
 
     public UserNotFoundException(String _uuid) {
-        this.uuid = _uuid;
+        message = "User with UUID: " + _uuid + " was not found.";
     }
+
+    public UserNotFoundException(Long _uid) {
+        message = "User with UID: " + _uid + " was not found.";
+    }
+
 
     @Override
     public String toString() {
         return "UserNotFoundException{" +
-                "uuid=" + uuid +
+                "message=" + message +
                 '}';
     }
 
     @Override
     public String getMessage() {
-        return "User with UUID: " + getUUID() + " was not found.";
-    }
-
-    public String getUUID() {
-        return uuid;
+        return message;
     }
 }
