@@ -62,7 +62,13 @@ public class GCloudDao implements IRMendDao {
     }
 
     public GCloudDao(GoogleCredential credential) throws GeneralSecurityException, IOException {
-        datastore = DatastoreFactory.get().create(DatastoreHelper.getOptionsFromEnv().credential(credential).build());
+        String defaultDataSet = System.getProperties().getProperty("com.google.appengine.application.id");
+        datastore = DatastoreFactory.get()
+                .create(DatastoreHelper.getOptionsFromEnv()
+                        .dataset(defaultDataSet)
+                        .credential(credential)
+                        .build()
+                );
         this.readBatchSize = DEFAULT_READ_BATCH_SIZE;
         this.writeBatchSize = DEFAULT_WRITE_BATCH_SIZE;
     }
