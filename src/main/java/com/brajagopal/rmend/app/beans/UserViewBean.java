@@ -19,6 +19,8 @@ public class UserViewBean {
     private Long docNum;
     private DateTime updateTS;
 
+    private String recType = "UNKNOWN";
+
     private Boolean isInvalid = false;
 
     private UserViewBean(Long _uid, Long _docNum) {
@@ -39,7 +41,7 @@ public class UserViewBean {
         updateTS = DateTime.now();
     }
 
-    private UserViewBean(String _uuid, Long _uid, Long _docNum) {
+    private UserViewBean(String _uuid, Long _uid, Long _docNum, String _recType) {
         if (Strings.isNullOrEmpty(_uuid) && _uid == 0) {
             this.isInvalid = true;
         }
@@ -50,6 +52,7 @@ public class UserViewBean {
         this.uid = _uid;
         this.docNum = _docNum;
         updateTS = DateTime.now();
+        this.recType = recType;
     }
 
     public static UserViewBean create(Long uid, Long docNumber) {
@@ -63,10 +66,12 @@ public class UserViewBean {
     @Override
     public String toString() {
         return "UserViewBean{" +
-                "uid=" + uid +
-                ", uuid=" + uuid +
+                "uuid='" + uuid + '\'' +
+                ", uid=" + uid +
                 ", docNum=" + docNum +
                 ", updateTS=" + updateTS +
+                ", recType='" + recType + '\'' +
+                ", isInvalid=" + isInvalid +
                 '}';
     }
 
@@ -102,6 +107,14 @@ public class UserViewBean {
         this.docNum = docNum;
     }
 
+    public String getRecType() {
+        return recType;
+    }
+
+    public void setRecType(String recType) {
+        this.recType = recType;
+    }
+
     public static class UserViewBeanSerDe implements JsonSerializer<UserViewBean>, JsonDeserializer<UserViewBean> {
 
         @Override
@@ -128,9 +141,9 @@ public class UserViewBean {
             final String uuid = SerDeUtils.getValue(root, "uuid", "");
             final Long uid = SerDeUtils.getValue(root, "uid", 0l);
             final Long docNum = SerDeUtils.getValue(root, "docNum", 0l);
+            final String recType = SerDeUtils.getValue(root, "recType", "UNKNOWN");
 
-            UserViewBean retVal = new UserViewBean(uuid, uid, docNum);
-            return new UserViewBean(uuid, uid, docNum);
+            return new UserViewBean(uuid, uid, docNum, recType);
         }
     }
 
