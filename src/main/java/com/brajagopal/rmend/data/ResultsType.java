@@ -17,7 +17,8 @@ public enum ResultsType {
     TOP_5(20, 5),
     TOP_3(10, 3),
     TOP_1(10, 1),
-    ALL(100, 30);
+    ALL(200, 30),
+    RANDOM_50(500, 50);
 
     private int fetchLimit;
     private int daoResultLimit;
@@ -42,6 +43,10 @@ public enum ResultsType {
 
         final List<DocumentMeta> value = new ArrayList<DocumentMeta>(_input);
         switch (_type){
+            case ALL:
+                Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
+                return value;
+            case RANDOM_50:
             case RANDOM_10:
                 if (value.size() > _type.getFetchLimit()) {
                     Collections.shuffle(value);
@@ -49,27 +54,14 @@ public enum ResultsType {
                 }
                 return value;
             case TOP_10:
-                if (value.size() > _type.getFetchLimit()) {
-                    Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
-                    return value.subList(0, _type.getFetchLimit());
-                }
-                return value;
             case TOP_5:
-                if (value.size() > _type.getFetchLimit()) {
-                    Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
-                    return value.subList(0, _type.getFetchLimit());
-                }
-                return value;
             case TOP_3:
+            case TOP_1:
                 if (value.size() > _type.getFetchLimit()) {
                     Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
                     return value.subList(0, _type.getFetchLimit());
                 }
                 return value;
-            case ALL:
-                Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
-                return value;
-            case TOP_1:
             default:
                 Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
                 return value.subList(0, 1);
