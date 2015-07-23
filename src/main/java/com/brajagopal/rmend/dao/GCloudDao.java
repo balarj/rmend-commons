@@ -14,6 +14,7 @@ import com.google.api.services.datastore.client.DatastoreException;
 import com.google.api.services.datastore.client.DatastoreFactory;
 import com.google.api.services.datastore.client.DatastoreHelper;
 import com.google.common.base.Function;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
 import org.apache.commons.collections4.CollectionUtils;
@@ -63,11 +64,13 @@ public class GCloudDao implements IRMendDao {
 
     public GCloudDao(GoogleCredential credential) throws GeneralSecurityException, IOException {
         String defaultDataSet = System.getProperties().getProperty("com.google.appengine.application.id");
+        defaultDataSet = Strings.isNullOrEmpty(defaultDataSet) ? System.getenv().get("DATASTORE_DATASET") : defaultDataSet;
+        defaultDataSet = Strings.isNullOrEmpty(defaultDataSet) ? System.getProperties().getProperty("app.id") : defaultDataSet;
         datastore = DatastoreFactory.get()
                 .create(DatastoreHelper.getOptionsFromEnv()
-                        .dataset(defaultDataSet)
-                        .credential(credential)
-                        .build()
+                                .dataset(defaultDataSet)
+                                .credential(credential)
+                                .build()
                 );
         this.readBatchSize = DEFAULT_READ_BATCH_SIZE;
         this.writeBatchSize = DEFAULT_WRITE_BATCH_SIZE;
@@ -177,7 +180,7 @@ public class GCloudDao implements IRMendDao {
             if (!lastEntityIdentifier.equals(_entityIdentifier)) {
                 if (entityCount != 0) {
                     logger.info("Finished processing (" + entityCount + " records) for entity: {" + lastEntityIdentifier + "}");
-                    logger.info("*** Overall progress: "+ Precision.round((((float)(runningCtr / totalCount)) * 100), 2) + "% ***");
+                    logger.info("*** Overall progress: "+ Precision.round(((Float.valueOf(runningCtr) / totalCount) * 100), 2) + "% ***");
                     logger.info("----------------------------------------------------------------------");
                     logger.info("Starting to process entity: {" + _entityIdentifier + "}");
                 }
