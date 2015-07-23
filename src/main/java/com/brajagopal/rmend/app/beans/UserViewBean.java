@@ -19,7 +19,7 @@ public class UserViewBean {
     private Long docNum;
     private DateTime updateTS;
 
-    private String recType = "UNKNOWN";
+    private String referrer = "UNKNOWN";
 
     private Boolean isInvalid = false;
 
@@ -41,7 +41,7 @@ public class UserViewBean {
         updateTS = DateTime.now();
     }
 
-    private UserViewBean(String _uuid, Long _uid, Long _docNum, String _recType) {
+    private UserViewBean(String _uuid, Long _uid, Long _docNum, String _referrer) {
         if (Strings.isNullOrEmpty(_uuid) && _uid == 0) {
             this.isInvalid = true;
         }
@@ -52,7 +52,7 @@ public class UserViewBean {
         this.uid = _uid;
         this.docNum = _docNum;
         updateTS = DateTime.now();
-        this.recType = recType;
+        this.referrer = _referrer;
     }
 
     public static UserViewBean create(Long uid, Long docNumber) {
@@ -70,7 +70,7 @@ public class UserViewBean {
                 ", uid=" + uid +
                 ", docNum=" + docNum +
                 ", updateTS=" + updateTS +
-                ", recType='" + recType + '\'' +
+                ", referrer='" + referrer + '\'' +
                 ", isInvalid=" + isInvalid +
                 '}';
     }
@@ -107,12 +107,12 @@ public class UserViewBean {
         this.docNum = docNum;
     }
 
-    public String getRecType() {
-        return recType;
+    public String getReferrer() {
+        return referrer;
     }
 
-    public void setRecType(String recType) {
-        this.recType = recType;
+    public void setReferrer(String referrer) {
+        this.referrer = referrer;
     }
 
     public static class UserViewBeanSerDe implements JsonSerializer<UserViewBean>, JsonDeserializer<UserViewBean> {
@@ -141,7 +141,7 @@ public class UserViewBean {
             final String uuid = SerDeUtils.getValue(root, "uuid", "");
             final Long uid = SerDeUtils.getValue(root, "uid", 0l);
             final Long docNum = SerDeUtils.getValue(root, "docNum", 0l);
-            final String recType = SerDeUtils.getValue(root, "recType", "UNKNOWN");
+            final String recType = SerDeUtils.getValue(root, "referrer", "UNKNOWN");
 
             return new UserViewBean(uuid, uid, docNum, recType);
         }
