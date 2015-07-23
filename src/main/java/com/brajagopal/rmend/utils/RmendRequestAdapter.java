@@ -1,8 +1,6 @@
 package com.brajagopal.rmend.utils;
 
 import com.brajagopal.rmend.app.beans.UserViewBean;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -26,6 +24,7 @@ import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -46,15 +45,25 @@ public class RmendRequestAdapter {
         cm = new PoolingNHttpClientConnectionManager(ioReactor);
         cm.setMaxTotal(20);
 
-        httpclient = HttpAsyncClients.createPipelining(cm);
+        httpclient = HttpAsyncClients.createPipelining();
         this.targetHost = _targetHost;
         this.endpointTemplate = _endpointTemplate;
     }
 
-    public Future<List<HttpResponse>> makeRequests(Long userId, Collection<Long> documentIds) {
-        Multimap<String, Integer> responses = HashMultimap.create();
-        Future<List<HttpResponse>> futureResponses =
-                httpclient.execute(new HttpHost(targetHost), buildRequests(userId, documentIds), null);
+    public List<HttpResponse> makeRequests(Long userId, Collection<Long> documentIds) throws IOException, ExecutionException, InterruptedException {
+        List<HttpResponse> futureResponses = new ArrayList<HttpResponse>();
+        List<HttpRequest> requests = buildRequests(userId, documentIds);
+        try {
+            httpclient.start();
+            Future<List<HttpResponse>> futures =
+                    httpclient.execute(HttpHost.create(targetHost), requests, null);
+            for (HttpResponse response : futures.get()) {
+                futureResponses.add(response);
+            }
+        }
+        finally {
+            httpclient.close();
+        }
 
         return futureResponses;
     }
