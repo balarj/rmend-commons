@@ -18,7 +18,8 @@ public enum ResultsType {
     TOP_3(10, 3),
     TOP_1(10, 1),
     ALL(200, 30),
-    RANDOM_50(500, 50);
+    RANDOM_50(500, 50),
+    RANDOM_5(500,5);
 
     private int fetchLimit;
     private int daoResultLimit;
@@ -48,6 +49,7 @@ public enum ResultsType {
                 return value;
             case RANDOM_50:
             case RANDOM_10:
+            case RANDOM_5:
                 if (value.size() > _type.getFetchLimit()) {
                     Collections.shuffle(value);
                     return value.subList(0, _type.getFetchLimit());
