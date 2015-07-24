@@ -76,7 +76,11 @@
             <artifactId>httpasyncclient</artifactId>
             <version>4.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.skife.terminal</groupId>
+            <artifactId>java-progress-bar</artifactId>
+            <version>0.0.4</version>
+        </dependency>
     </dependencies>
 
     <build>
