@@ -1,11 +1,11 @@
 package com.brajagopal.rmend.dao;
 
-import com.brajagopal.rmend.data.ResultsType;
-import com.brajagopal.rmend.exception.DocumentNotFoundException;
 import com.brajagopal.rmend.data.ContentDictionary;
+import com.brajagopal.rmend.data.ResultsType;
 import com.brajagopal.rmend.data.beans.BaseContent;
 import com.brajagopal.rmend.data.beans.DocumentBean;
 import com.brajagopal.rmend.data.meta.DocumentMeta;
+import com.brajagopal.rmend.exception.DocumentNotFoundException;
 import com.brajagopal.rmend.utils.JsonUtils;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.datastore.DatastoreV1.*;
@@ -52,6 +52,9 @@ public class GCloudDao implements IRMendDao {
     static final String DOCUMENT_SCORE_KIND = "score";
     static final String ENTITIY_CLASSIFIER_KIND = "entityId";
     static final String DOCUMENT_META_KIND = "docMeta";
+
+    static final String TIMESTAMP_KIND = "_timestamp";
+    static final String ENTITY_TOPIC_LIST = "TOPIC_LIST";
 
     static final int DEFAULT_RESULT_LIMIT = 20;
     static final int DEFAULT_READ_BATCH_SIZE = 10;
@@ -163,7 +166,9 @@ public class GCloudDao implements IRMendDao {
         int totalCount = _docMetaCollection.size();
         String lastEntityIdentifier = "";
         int entityCount = 0;
+
         Mutation.Builder builder = Mutation.newBuilder();
+
         for (Map.Entry<String, DocumentMeta> entry : _docMetaCollection) {
             String _entityIdentifier = entry.getKey();
             DocumentMeta _docMeta = entry.getValue();
@@ -177,12 +182,25 @@ public class GCloudDao implements IRMendDao {
 
             builder.addInsert(article);
 
+            // For all topics,
+            if (ContentDictionary.getContentType(_entityIdentifier).toString()
+                    .equals(BaseContent.ContentType.TOPICS.toString())) {
+
+                String key = ContentDictionary.getContentName(_entityIdentifier);
+                Entity topic = Entity.newBuilder()
+                        .setKey(DatastoreHelper.makeKey(ENTITY_TOPIC_LIST, key))
+                        .addProperty(DatastoreHelper.makeProperty(TIMESTAMP_KIND, DatastoreHelper.makeValue(System.currentTimeMillis()).setIndexed(false)))
+                        .build();
+
+                builder.addUpsert(topic);
+            }
+
             if (!lastEntityIdentifier.equals(_entityIdentifier)) {
                 if (entityCount != 0) {
-                    logger.info("Finished processing (" + entityCount + " records) for entity: {" + lastEntityIdentifier + "}");
-                    logger.info("*** Overall progress: "+ Precision.round(((Float.valueOf(runningCtr) / totalCount) * 100), 2) + "% ***");
-                    logger.info("----------------------------------------------------------------------");
-                    logger.info("Starting to process entity: {" + _entityIdentifier + "}");
+                    //logger.info("Finished processing (" + entityCount + " records) for entity: {" + lastEntityIdentifier + "}");
+                    printProgressBar((int) Precision.round(((Float.valueOf(runningCtr) / totalCount) * 100), 2));
+                    //logger.info("----------------------------------------------------------------------");
+                    //logger.info("Starting to process entity: {" + _entityIdentifier + "}");
                 }
                 // reset the identifier and counter
                 lastEntityIdentifier = _entityIdentifier;
@@ -202,7 +220,7 @@ public class GCloudDao implements IRMendDao {
                 }
             }
         }
-        logger.info("-- Total Entities processed: "+runningCtr);
+        logger.info("-- Total Entities processed: " + runningCtr);
     }
 
     @Override
@@ -303,5 +321,28 @@ public class GCloudDao implements IRMendDao {
             entities.add(result.getEntity());
         }
         return entities;
+    }
+
+    /**
+     * Inspiration from Nakkaya's blog post
+     *
+     * Credits: http://nakkaya.com/2009/11/08/command-line-progress-bar/
+     * @param percent
+     */
+    private static void printProgressBar(int percent){
+        StringBuilder bar = new StringBuilder("Entity ingestion progress: [");
+
+        for(int i = 0; i < 50; i++){
+            if( i < (percent/2)){
+                bar.append("=");
+            }else if( i == (percent/2)){
+                bar.append(">");
+            }else{
+                bar.append(" ");
+            }
+        }
+
+        bar.append("]   " + percent + "%     ");
+        System.out.print("\r" + bar.toString());
     }
 }
