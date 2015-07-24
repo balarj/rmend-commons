@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import java.io.InvalidClassException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -83,6 +84,11 @@ public class ContentDictionary {
 
     public static BaseContent.ContentType getContentType(String _key) {
         return BaseContent.ContentType.valueOf(StringUtils.split(_key, KEY_SEPARATOR)[0]);
+    }
+
+    public static String getContentName(String _key) {
+        List<String> values = Arrays.asList(StringUtils.split(_key, KEY_SEPARATOR));
+        return values.get(values.size()-1);
     }
 
     public int size() {
