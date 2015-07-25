@@ -32,4 +32,6 @@ public interface IRMendDao {
 
     public Collection<DocumentMeta> getEntityMeta(String _metaIdentifier, ResultsType _resultsType) throws DatastoreException;
     public TreeMultimap<BaseContent.ContentType, DocumentMeta> getEntityMeta(Collection<String> _metaIdentifiers, ResultsType _resultsType) throws DatastoreException;
+
+    public Collection<String> getAllTopics() throws DatastoreException;
 }

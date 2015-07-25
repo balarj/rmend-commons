@@ -274,6 +274,27 @@ public class GCloudDao implements IRMendDao {
         return retVal;
     }
 
+    @Override
+    public Collection<String> getAllTopics() throws DatastoreException {
+        Collection<String> retVal = null;
+        Query.Builder query = Query.newBuilder();
+        query.addKindBuilder().setName(ENTITY_TOPIC_LIST);
+        // keys-only query.
+        query.addProjectionBuilder().setProperty(DatastoreHelper.makePropertyReference("__key__"));
+
+        List<Entity> entityMetadata = runQuery(query.build());
+        if (entityMetadata.size() == 0) {
+            return Collections.emptyList();
+        }
+        else {
+            retVal = new ArrayList<String>(entityMetadata.size());
+            for (Entity entity : entityMetadata) {
+                retVal.add(entity.getKey().getPathElement(0).getName());
+            }
+        }
+        return retVal;
+    }
+
     private void persist(Mutation.Builder _builder) throws DatastoreException, InterruptedException {
         CommitRequest request = CommitRequest.newBuilder()
                 .setMode(CommitRequest.Mode.NON_TRANSACTIONAL)
