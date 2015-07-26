@@ -1,5 +1,6 @@
 package com.brajagopal.rmend.data;
 
+import com.brajagopal.rmend.data.beans.DocumentBean;
 import com.brajagopal.rmend.data.meta.DocumentMeta;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -38,7 +39,7 @@ public enum ResultsType {
         return fetchLimit;
     }
 
-    public static Collection<DocumentMeta> getResults(Collection<DocumentMeta> _input, ResultsType _type) {
+    public static Collection<DocumentMeta> getResultsForCR(Collection<DocumentMeta> _input, ResultsType _type) {
         if(_input == null || _input.isEmpty()) {
             return CollectionUtils.EMPTY_COLLECTION;
         }
@@ -68,6 +69,36 @@ public enum ResultsType {
                 return value;
             default:
                 Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
+                return value.subList(0, 1);
+        }
+    }
+
+    public static Collection<DocumentBean> getResultsForCF(Collection<DocumentBean> _input, ResultsType _type) {
+        if(_input == null || _input.isEmpty()) {
+            return CollectionUtils.EMPTY_COLLECTION;
+        }
+
+        final List<DocumentBean> value = new ArrayList<DocumentBean>(_input);
+        switch (_type){
+            case ALL:
+            case RANDOM_50:
+            case RANDOM_20:
+            case RANDOM_10:
+            case RANDOM_5:
+                if (value.size() > _type.getFetchLimit()) {
+                    Collections.shuffle(value);
+                    return value.subList(0, _type.getFetchLimit());
+                }
+                return value;
+            case TOP_10:
+            case TOP_5:
+            case TOP_3:
+            case TOP_1:
+                if (value.size() > _type.getFetchLimit()) {
+                    return value.subList(0, _type.getFetchLimit());
+                }
+                return value;
+            default:
                 return value.subList(0, 1);
         }
     }
