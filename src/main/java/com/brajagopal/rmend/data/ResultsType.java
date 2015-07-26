@@ -12,19 +12,20 @@ import java.util.List;
  * @author <bxr4261>
  */
 public enum ResultsType {
-    RANDOM_10(100, 10),
     TOP_10(30, 10),
     TOP_5(20, 5),
     TOP_3(10, 3),
     TOP_1(10, 1),
     ALL(200, 30),
     RANDOM_50(500, 50),
-    RANDOM_5(500,5);
+    RANDOM_20(100, 10),
+    RANDOM_10(100, 10),
+    RANDOM_5(500, 5);
 
     private int fetchLimit;
     private int daoResultLimit;
 
-    private ResultsType(int _daoResultLimit, int _fetchLimit) {
+    ResultsType(int _daoResultLimit, int _fetchLimit) {
         daoResultLimit = _daoResultLimit;
         fetchLimit = _fetchLimit;
     }
@@ -48,6 +49,7 @@ public enum ResultsType {
                 Collections.sort(value, DocumentMeta.DOCUMENT_META_COMPARATOR);
                 return value;
             case RANDOM_50:
+            case RANDOM_20:
             case RANDOM_10:
             case RANDOM_5:
                 if (value.size() > _type.getFetchLimit()) {
