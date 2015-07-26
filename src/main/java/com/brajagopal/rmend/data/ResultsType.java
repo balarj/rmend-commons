@@ -4,10 +4,7 @@ import com.brajagopal.rmend.data.beans.DocumentBean;
 import com.brajagopal.rmend.data.meta.DocumentMeta;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author <bxr4261>
@@ -53,8 +50,8 @@ public enum ResultsType {
             case RANDOM_20:
             case RANDOM_10:
             case RANDOM_5:
+                Collections.shuffle(value);
                 if (value.size() > _type.getFetchLimit()) {
-                    Collections.shuffle(value);
                     return value.subList(0, _type.getFetchLimit());
                 }
                 return value;
@@ -85,8 +82,8 @@ public enum ResultsType {
             case RANDOM_20:
             case RANDOM_10:
             case RANDOM_5:
+                Collections.shuffle(value);
                 if (value.size() > _type.getFetchLimit()) {
-                    Collections.shuffle(value);
                     return value.subList(0, _type.getFetchLimit());
                 }
                 return value;
