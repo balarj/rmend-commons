@@ -141,7 +141,7 @@ public class UserViewBean {
             final String uuid = SerDeUtils.getValue(root, "uuid", "");
             final Long uid = SerDeUtils.getValue(root, "uid", 0l);
             final Long docNum = SerDeUtils.getValue(root, "docNum", 0l);
-            final String recType = SerDeUtils.getValue(root, "referrer", "UNKNOWN");
+            final String recType = SerDeUtils.getValue(root, "referrer", "UNKNOWN").toUpperCase();
 
             return new UserViewBean(uuid, uid, docNum, recType);
         }
