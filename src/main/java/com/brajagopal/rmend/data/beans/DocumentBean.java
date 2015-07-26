@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.TreeMultimap;
 import com.google.gson.*;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -178,14 +179,31 @@ public class DocumentBean extends BaseContent {
             }
             root.add("topics", jsonTopicsArray);
             root.addProperty("docNum", bean.documentNumber);
-            final JsonArray jsonContentBeanArray = new JsonArray();
+            Collection<BaseContent> filteredContentBeans = new ArrayList<BaseContent>();
             for (Map.Entry<ContentType, Collection<BaseContent>> entry : bean.getContentBeansByType().entrySet()) {
+                SortedSet<BaseContent> sortedSet = new TreeSet<BaseContent>((Comparator<? super BaseContent>) BaseContent.CONTENT_COMPARATOR);
                 for (final BaseContent contentBean : entry.getValue()) {
                     try {
-                        jsonContentBeanArray.add(new JsonPrimitive(new Gson().toJson(contentBean)));
+                        if (contentBean.isForEndUserDisplay()) {
+                            sortedSet.add(contentBean);
+                        }
                     }
                     catch (UnsupportedOperationException e) {}
                 }
+                if (sortedSet.size() > 0) {
+                    filteredContentBeans.addAll(
+                            sortedSet.headSet(
+                                    CollectionUtils.get(
+                                            sortedSet,
+                                            ((sortedSet.size() >= 3) ? 2 : sortedSet.size())
+                                    )
+                            )
+                    );
+                }
+            }
+            final JsonArray jsonContentBeanArray = new JsonArray();
+            for (BaseContent contentBean : filteredContentBeans) {
+                jsonContentBeanArray.add(new JsonPrimitive(contentBean.getType() + ":" + contentBean.getName()));
             }
             root.add("contentBeans", jsonContentBeanArray);
 
