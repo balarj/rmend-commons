@@ -191,14 +191,21 @@ public class DocumentBean extends BaseContent {
                     catch (UnsupportedOperationException e) {}
                 }
                 if (sortedSet.size() > 0) {
-                    filteredContentBeans.addAll(
-                            sortedSet.headSet(
-                                    CollectionUtils.get(
-                                            sortedSet,
-                                            ((sortedSet.size() >= 3) ? 2 : sortedSet.size())
-                                    )
-                            )
-                    );
+                    try {
+                        filteredContentBeans.addAll(
+                                sortedSet.headSet(
+                                        CollectionUtils.get(
+                                                sortedSet,
+                                                ((sortedSet.size() >= 3) ? 2 : sortedSet.size())
+                                        )
+                                )
+                        );
+                    }
+                    catch (IndexOutOfBoundsException e) {
+                        logger.warn("DocumentID: " + bean.getDocumentNumber());
+                        logger.warn("Entry: " + entry.getKey());
+                        logger.warn("SortedSet(size): " + sortedSet.size());
+                    }
                 }
             }
             final JsonArray jsonContentBeanArray = new JsonArray();
