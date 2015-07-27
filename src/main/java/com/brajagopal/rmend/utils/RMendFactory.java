@@ -7,11 +7,15 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.datastore.client.DatastoreOptions;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 /**
  * @author <bxr4261>
@@ -36,7 +40,6 @@ public class RMendFactory {
                 logger.warn(e);
             } catch (IOException e) {
                 logger.warn(e);
-                e.printStackTrace();
             }
         }
         return dao;
@@ -63,5 +66,21 @@ public class RMendFactory {
                 .build();
 
         return credential;
+    }
+
+    public static String getUserInput(String _message) {
+        Scanner in = null;
+        String retVal = null;
+        try {
+            in = new Scanner(new InputStreamReader(System.in));
+            System.out.print(_message + ": ");
+            retVal = in.nextLine();
+        }
+        catch (NoSuchElementException e) {}
+        finally {
+            in.reset();
+            IOUtils.closeQuietly(in);
+        }
+        return retVal;
     }
 }
