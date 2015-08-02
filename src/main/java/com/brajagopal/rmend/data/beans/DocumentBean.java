@@ -1,5 +1,6 @@
 package com.brajagopal.rmend.data.beans;
 
+import com.brajagopal.rmend.utils.RMendFactory;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.TreeMultimap;
 import com.google.gson.*;
@@ -24,6 +25,7 @@ public class DocumentBean extends BaseContent {
     private long documentNumber;
     private String docId;
     private String title;
+    private String docAbstract;
     private String document;
     private String contentMD5Sum;
     private Collection<String> topics;
@@ -42,11 +44,11 @@ public class DocumentBean extends BaseContent {
         Map<String, String> infoValue = ((Map<String, String>)_value.get("info"));
         String documentId = infoValue.get("docId");
         String docBody = infoValue.get("document");
-        String[] docElements = docBody.split("\\n", 2);
+        String[] docElements = docBody.split("\\n", 3);
 
-        if (docElements.length == 2) {
+        if (docElements.length == 3) {
             this.title = docElements[0];
-            this.document = StringUtils.trim(docElements[1]);
+            this.document = StringUtils.trim(docElements[(docElements.length-1)]);
         }
         else {
             this.title = "";
@@ -169,9 +171,10 @@ public class DocumentBean extends BaseContent {
         public JsonElement serialize(final DocumentBean bean, Type type, JsonSerializationContext jsonSerializationContext) {
             JsonObject root = new JsonObject();
             root.addProperty("docId", bean.docId);
-            root.addProperty("title", bean.title);
+            root.addProperty("title", RMendFactory.trimToSentence(bean.title, 30));
             root.addProperty("md5sum", bean.contentMD5Sum);
             root.addProperty("docBody", bean.document);
+            root.addProperty("abstract", RMendFactory.trimToSentence(bean.docAbstract, 120));
             final JsonArray jsonTopicsArray = new JsonArray();
             for (final String topic : bean.getTopic()) {
                 final JsonPrimitive topicPrimitive = new JsonPrimitive(topic);
@@ -234,7 +237,6 @@ public class DocumentBean extends BaseContent {
             }
             bean.topics = topics;
             bean.documentNumber = root.get("docNum").getAsLong();
-            bean.document = root.get("docBody").getAsString();
             final JsonArray jsonContentBeanArray = root.get("contentBeans").getAsJsonArray();
 
             HashMultimap<ContentType, BaseContent> contentBeans = null;
@@ -249,6 +251,18 @@ public class DocumentBean extends BaseContent {
                 }
             }
             bean.contentBeans = contentBeans;
+
+            String docBody = root.get("docBody").getAsString();
+            String[] docElements = docBody.split("\\n", 3);
+
+            if (docElements.length == 3) {
+                bean.docAbstract = docElements[0];
+                bean.document = StringUtils.trim(docElements[(docElements.length-1)]);
+            }
+            else {
+                bean.docAbstract = "Abstract unavailable";
+                bean.document = StringUtils.toEncodedString(docBody.getBytes(), Charset.forName("UTF8"));
+            }
 
             return bean;
         }
