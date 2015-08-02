@@ -8,6 +8,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.datastore.client.DatastoreOptions;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -82,5 +83,11 @@ public class RMendFactory {
             IOUtils.closeQuietly(in);
         }
         return retVal;
+    }
+
+    public static String trimToSentence(String value, int size) {
+        return (value.length() > size) ?
+                    StringUtils.substringBeforeLast(StringUtils.left(value, size), " ") :
+                    value;
     }
 }
