@@ -301,7 +301,7 @@ public class GCloudDao implements IRMendDao {
                 .setMutation(_builder)
                 .build();
 
-        int timeout_ms = 100;
+        int timeout_ms = 200;
         int timeout_cnt = 10;
         while(true && timeout_cnt != 0) {
             try {
@@ -313,8 +313,8 @@ public class GCloudDao implements IRMendDao {
                     timeout_ms *= 2;
                     timeout_cnt--;
                 }
-                else if (e.getCode() == 500) {
-                    timeout_cnt-=6; // We dont want to keep retrying this more than once
+                else if (Arrays.asList(502, 500).contains(e.getCode())) {
+                    timeout_cnt-=5; // We dont want to keep retrying this more than once
                     Thread.sleep(30000l);
                 }
                 else {
