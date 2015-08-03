@@ -171,7 +171,8 @@ public class DocumentBean extends BaseContent {
         public JsonElement serialize(final DocumentBean bean, Type type, JsonSerializationContext jsonSerializationContext) {
             JsonObject root = new JsonObject();
             root.addProperty("docId", bean.docId);
-            root.addProperty("title", RMendFactory.trimToSentence(bean.title, 30));
+            root.addProperty("abstractTitle", RMendFactory.trimToSentence(bean.title, 28) + "...");
+            root.addProperty("title", bean.title);
             root.addProperty("md5sum", bean.contentMD5Sum);
             root.addProperty("docBody", bean.document);
             root.addProperty("abstract", RMendFactory.trimToSentence(bean.docAbstract, 120));
