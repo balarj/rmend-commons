@@ -17,6 +17,7 @@ public class UserViewBean {
     private String uuid;
     private Long uid;
     private Long docNum;
+    private Long parentDocNum;
     private DateTime updateTS;
 
     private String referrer = "UNKNOWN";
@@ -41,7 +42,7 @@ public class UserViewBean {
         updateTS = DateTime.now();
     }
 
-    private UserViewBean(String _uuid, Long _uid, Long _docNum, String _referrer) {
+    private UserViewBean(String _uuid, Long _uid, Long _docNum, Long _parentDocNum, String _referrer) {
         if (Strings.isNullOrEmpty(_uuid) && _uid == 0) {
             this.isInvalid = true;
         }
@@ -51,6 +52,7 @@ public class UserViewBean {
         this.uuid = _uuid;
         this.uid = _uid;
         this.docNum = _docNum;
+        this.parentDocNum = _parentDocNum;
         updateTS = DateTime.now();
         this.referrer = _referrer;
     }
@@ -111,6 +113,14 @@ public class UserViewBean {
         return referrer;
     }
 
+    public Long getParentDocNum() {
+        return parentDocNum;
+    }
+
+    public void setParentDocNum(Long parentDocNum) {
+        this.parentDocNum = parentDocNum;
+    }
+
     public void setReferrer(String referrer) {
         this.referrer = referrer;
     }
@@ -127,6 +137,7 @@ public class UserViewBean {
             root.addProperty("uuid", userViewBean.getUuid());
             root.addProperty("uid", userViewBean.getUid());
             root.addProperty("docNum", userViewBean.getDocNum());
+            root.addProperty("parentDoc", userViewBean.getParentDocNum());
             root.addProperty("updateTS", userViewBean.getUpdateTS().toString("YYYY-MM-dd HH:mm:ss"));
             return root;
         }
@@ -141,9 +152,10 @@ public class UserViewBean {
             final String uuid = SerDeUtils.getValue(root, "uuid", "");
             final Long uid = SerDeUtils.getValue(root, "uid", 0l);
             final Long docNum = SerDeUtils.getValue(root, "docNum", 0l);
+            final Long parentDocNum = SerDeUtils.getValue(root, "parentDoc", -1l);
             final String recType = SerDeUtils.getValue(root, "referrer", "UNKNOWN").toUpperCase();
 
-            return new UserViewBean(uuid, uid, docNum, recType);
+            return new UserViewBean(uuid, uid, docNum, parentDocNum, recType);
         }
     }
 
