@@ -16,7 +16,7 @@ public enum ResultsType {
     TOP_1(10, 1),
     ALL(200, 30),
     RANDOM_50(500, 50),
-    RANDOM_20(100, 10),
+    RANDOM_20(100, 20),
     RANDOM_10(100, 10),
     RANDOM_5(500, 5);
 
